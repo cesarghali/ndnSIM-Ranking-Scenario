@@ -51,7 +51,7 @@ main (int argc, char *argv[])
   // Install CCNx stack on all nodes
   ndn::StackHelper ccnxHelper;
   ccnxHelper.SetDefaultRoutes (true);
-  ccnxHelper.SetContentStore ("ns3::ndn::cs::Lru", "MaxSize", "0");
+  ccnxHelper.SetContentStore ("ns3::ndn::cs::Lru", "MaxSize", "0", "ExclusionDiscardedTimeout", "20");
   ccnxHelper.InstallAll ();
   Config::Connect ("/NodeList/0/$ns3::ndn::cs::Lru/CacheMisses", MakeCallback (CacheMiss));
   Config::Connect ("/NodeList/0/$ns3::ndn::cs::Lru/CacheHits", MakeCallback (CacheHit));
