@@ -12,19 +12,12 @@
 
 using namespace ns3;
 
-int cacheMissCount = 0;
-int cacheHitCount = 0;
+int badContentCount = 0;
 
 void
-CacheMiss (std::string context, Ptr<ns3::ndn::Interest const> interest)
+BadContentReceived (std::string context, Ptr<ns3::ndn::ContentObject const> content)
 {
-  cacheMissCount++;
-}
-
-void
-CacheHit (std::string context, Ptr<ns3::ndn::Interest const> interest, Ptr<ns3::ndn::ContentObject const> content)
-{
-  cacheHitCount++;
+  badContentCount++;
 }
 
 int 
@@ -51,10 +44,8 @@ main (int argc, char *argv[])
   // Install CCNx stack on all nodes
   ndn::StackHelper ccnxHelper;
   ccnxHelper.SetDefaultRoutes (true);
-  ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0", "ExclusionDiscardedTimeout", "20");
+  ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0", "ExclusionDiscardedTimeout", "20", "DisableRanking", "false");
   ccnxHelper.InstallAll ();
-  Config::Connect ("/NodeList/0/$ns3::ndn::cs::Freshness::Lru/CacheMisses", MakeCallback (CacheMiss));
-  Config::Connect ("/NodeList/0/$ns3::ndn::cs::Freshness::Lru/CacheHits", MakeCallback (CacheHit));
 
   // Install Applications
 
@@ -66,6 +57,7 @@ main (int argc, char *argv[])
   consumerHelper.SetAttribute ("Repeat", BooleanValue (true));
   consumerHelper.SetAttribute ("ExclusionRate", DoubleValue (0.0));
   consumerHelper.Install (nodes.Get (0)); // first node
+  Config::Connect ("/NodeList/*/ApplicationList/*/BadContentReceived", MakeCallback (BadContentReceived));
 
   // Producer
   ndn::AppHelper producerHelper ("ns3::ndn::Producer");
@@ -76,17 +68,16 @@ main (int argc, char *argv[])
   producerHelper.Install (nodes.Get (2)); // last node
 
 
-  std::cout << "------------------------------------------------------" << std::endl;
-  std::cout << "Bad Content Rate        Cache Misses        Cache Hits" << std::endl;
-  std::cout << "------------------------------------------------------" << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << "Bad Content Rate        Bad Content Reception" << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
   for (int i = 0; i < (1 / BAD_CONTENT_RATE_STEP) + 1; i++)
     {
       float bad_content_rate = 0 + (BAD_CONTENT_RATE_STEP * i);
       nodes.Get (2)->GetApplication (0)->SetAttribute ("BadContentRate", DoubleValue (bad_content_rate));
 
       // Reset counters
-      cacheMissCount = 0;
-      cacheHitCount = 0;
+      badContentCount = 0;
 
       for (int i = 0; i < ITERATIONS; i++)
 	{
@@ -98,14 +89,12 @@ main (int argc, char *argv[])
       // Print out results
       std::cout << std::fixed << std::setprecision(2);
       std::cout << std::setw(16) << bad_content_rate;
-      std::cout << std::fixed << std::setprecision(4);
-      std::cout << std::setw(19) << ((float)cacheMissCount / (DURATION * ITERATIONS)) * 100 << "%";
-      std::cout << std::setw(17) << ((float)cacheHitCount / (DURATION * ITERATIONS)) * 100 << "%";
+      std::cout << std::setw(28) << ((float)badContentCount / (DURATION * ITERATIONS)) * 100 << "%";
       std::cout << std::endl;
 
       sleep(5);
     }
-  std::cout << "------------------------------------------------------" << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
 
   Simulator::Destroy ();
 
