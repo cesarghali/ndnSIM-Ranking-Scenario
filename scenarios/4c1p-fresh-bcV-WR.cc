@@ -96,7 +96,7 @@ main (int argc, char *argv[])
 
       // Print out results
       std::cout << std::fixed << std::setprecision(4);
-      std::cout << std::setw(26) << ((float)badContentCount / (DURATION * NUM_OF_CONSUMERS)) * 100 << "%";
+      std::cout << std::setw(28) << ((float)badContentCount / (DURATION * NUM_OF_CONSUMERS)) * 100 << "%";
       std::cout << std::endl;
     }
   std::cout << "---------------------------------------------" << std::endl;
