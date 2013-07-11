@@ -8,6 +8,7 @@
 
 #define BAD_CONTENT_RATE_STEP 0.1
 #define DURATION 360000
+#define TIMEOUT 7200
 #define NUM_OF_CONSUMERS 2
 #define PRODUCER_INDEX 3
 
@@ -57,9 +58,12 @@ main (int argc, char *argv[])
       p2p.Install (nodes.Get (2), nodes.Get (3));
 
       // Install CCNx with cache on all nodes
+      std::ostringstream exclusion_discard_timeout;
+      exclusion_discard_timeout << TIMEOUT;
+
       ndn::StackHelper ccnxHelper;
       ccnxHelper.SetDefaultRoutes (true);
-      ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Random", "MaxSize", "0", "ExclusionDiscardedTimeout", "7200", "DisableRanking", "true");
+      ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Random", "MaxSize", "0", "ExclusionDiscardedTimeout", exclusion_discard_timeout.str(), "DisableRanking", "true");
       ccnxHelper.InstallAll ();
 
       // Install Applications
@@ -81,7 +85,7 @@ main (int argc, char *argv[])
       // Producer will reply to all requests starting with /prefix
       producerHelper.SetPrefix ("/prefix");
       producerHelper.SetAttribute ("PayloadSize", StringValue("1024"));
-      producerHelper.SetAttribute ("Freshness", TimeValue (Seconds (7200)));
+      producerHelper.SetAttribute ("Freshness", TimeValue (Seconds (TIMEOUT)));
       producerHelper.SetAttribute ("BadContentRate", DoubleValue (bad_content_rate));
       producerHelper.Install (nodes.Get (PRODUCER_INDEX)); // last node
 

@@ -8,6 +8,7 @@
 
 #define BAD_CONTENT_RATE_STEP 0.1
 #define DURATION 360000
+#define TIMEOUT 7200
 
 using namespace ns3;
 
@@ -48,9 +49,12 @@ main (int argc, char *argv[])
       p2p.Install (nodes.Get (1), nodes.Get (2));
 
       // Install CCNx stack on all nodes
+      std::ostringstream exclusion_discard_timeout;
+      exclusion_discard_timeout << TIMEOUT;
+
       ndn::StackHelper ccnxHelper;
       ccnxHelper.SetDefaultRoutes (true);
-      ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0", "ExclusionDiscardedTimeout", "7200", "DisableRanking", "true");
+      ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0", "ExclusionDiscardedTimeout", exclusion_discard_timeout.str(), "DisableRanking", "true");
       ccnxHelper.InstallAll ();
 
       // Install Applications
@@ -70,7 +74,7 @@ main (int argc, char *argv[])
       // Producer will reply to all requests starting with /prefix
       producerHelper.SetPrefix ("/prefix");
       producerHelper.SetAttribute ("PayloadSize", StringValue("1024"));
-      producerHelper.SetAttribute ("Freshness", TimeValue (Seconds (7200)));
+      producerHelper.SetAttribute ("Freshness", TimeValue (Seconds (TIMEOUT)));
       producerHelper.SetAttribute ("BadContentRate", DoubleValue (bad_content_rate));
       producerHelper.Install (nodes.Get (2)); // last node
 
