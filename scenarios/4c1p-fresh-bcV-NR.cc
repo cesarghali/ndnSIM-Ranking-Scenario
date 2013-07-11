@@ -65,7 +65,7 @@ main (int argc, char *argv[])
 
       ndn::StackHelper ccnxHelper;
       ccnxHelper.SetDefaultRoutes (true);
-      ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Random", "MaxSize", "0", "ExclusionDiscardedTimeout", exclusion_discard_timeout.str(), "DisableRanking", "true");
+      ccnxHelper.SetContentStore ("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0", "ExclusionDiscardedTimeout", exclusion_discard_timeout.str(), "DisableRanking", "true");
       ccnxHelper.InstallAll ();
 
       // Install Applications
