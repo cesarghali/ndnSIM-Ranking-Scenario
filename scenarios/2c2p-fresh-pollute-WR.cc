@@ -64,7 +64,7 @@ main (int argc, char *argv[])
   p2p.Install (nodes.Get (1), nodes.Get (0));
   p2p.Install (nodes.Get (2), nodes.Get (0));
   p2p.Install (nodes.Get (3), nodes.Get (0));
-  for (int i = 0; i < 4 + NUM_OF_CONSUMERS; i++)
+  for (int i = 4; i < 4 + NUM_OF_CONSUMERS; i++)
     {
       p2p.Install (nodes.Get (i), nodes.Get (0));
     }
@@ -137,7 +137,7 @@ main (int argc, char *argv[])
   goodConsumerHelper.SetAttribute ("MaxSeq", StringValue ("0"));
   goodConsumerHelper.SetAttribute ("Repeat", BooleanValue (true));
   goodConsumerHelper.SetAttribute ("ExclusionRate", DoubleValue (0.0));
-  badConsumerHelper.SetAttribute ("DisableExclusion", BooleanValue (false));
+  goodConsumerHelper.SetAttribute ("DisableExclusion", BooleanValue (false));
   for (int i = 4; i < 4 + NUM_OF_CONSUMERS; i++)
     {
       apps = goodConsumerHelper.Install (nodes.Get (i));
