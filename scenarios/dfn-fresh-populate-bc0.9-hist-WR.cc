@@ -19,7 +19,6 @@
 
 #define NUM_OF_CONSUMERS 16
 #define NUM_OF_ROUTERS 30
-#define NUM_OF_PRODUCERS 2
 
 using namespace ns3;
 
@@ -116,9 +115,9 @@ main (int argc, char *argv[])
       goodContentReceivedCount = 0;
       contentReceivedCount = 0;
 
-      // Creating nodes (0: router, 1: bad consumer, 2: bad producer, 3: good producer, rest are good consumers
+      // Creating nodes
       NodeContainer nodes;
-      nodes.Create (NUM_OF_CONSUMERS + NUM_OF_ROUTERS + NUM_OF_PRODUCERS);
+      nodes.Create (NUM_OF_CONSUMERS + NUM_OF_ROUTERS);
 
       // Connecting nodes using two links
       PointToPointHelper p2p;
@@ -198,9 +197,6 @@ main (int argc, char *argv[])
       // 27 done
       // 28 done
       // 29 done
-      // Conneting producers to edge routers
-      p2p.Install (nodes.Get (0 + NUM_OF_CONSUMERS + NUM_OF_ROUTERS), nodes.Get (2 + NUM_OF_CONSUMERS));      // P0 <--> R2
-      p2p.Install (nodes.Get (1 + NUM_OF_CONSUMERS + NUM_OF_ROUTERS), nodes.Get (24 + NUM_OF_CONSUMERS));     // P1 <--> R26
 
       
       // Install CCNx with cache on all routers
@@ -228,7 +224,7 @@ main (int argc, char *argv[])
 	  nodes.Get (i)->GetObject<ns3::ndn::ContentStore> ()->Populate ();
 	}
 
-      // Install CCNx without cache on consumers and producers
+      // Install CCNx without cache on consumers
       std::ostringstream max_uint32_t;
       max_uint32_t << (sizeof(uint32_t) * 256) - 1;
 
@@ -239,25 +235,9 @@ main (int argc, char *argv[])
 	{
 	  ccnxHelperNoCache.Install (nodes.Get (i));
 	}
-      for (int i = NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS + NUM_OF_PRODUCERS; i++)
-	{
-	  ccnxHelperNoCache.Install (nodes.Get (i));
-	}
 
 
       // Install Applications
-
-      // Good Producer
-      ndn::AppHelper goodProducerHelper ("ns3::ndn::Producer");
-      // Producer will reply to all requests with good content starting with /prefix
-      goodProducerHelper.SetPrefix ("/prefix");
-      goodProducerHelper.SetAttribute ("PayloadSize", StringValue("1024"));
-      goodProducerHelper.SetAttribute ("Freshness", TimeValue (Seconds(GOOD_CONTENT_TIMEOUT)));
-      goodProducerHelper.SetAttribute ("BadContentRate", DoubleValue (0.0));
-      for (int i = NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS + NUM_OF_PRODUCERS; i++)
-	{
-	  goodProducerHelper.Install (nodes.Get (i));
-	}
 
       // Good Consumer
       ndn::AppHelper goodConsumerHelper ("ns3::ndn::ConsumerCbr");
