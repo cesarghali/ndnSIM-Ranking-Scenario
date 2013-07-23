@@ -222,7 +222,7 @@ main (int argc, char *argv[])
       ccnxHelperWithCache.SetContentStoreAttribute ("BadContentCount", bad_content_count.str());
       ccnxHelperWithCache.SetContentStoreAttribute ("BadContentPayloadSize", "1024");
       ccnxHelperWithCache.SetContentStoreAttribute ("BadContentRate", bad_content_rate.str());
-      for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_PRODUCERS; i++)
+      for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++)
 	{
 	  ccnxHelperWithCache.Install (nodes.Get (i));
 	  nodes.Get (i)->GetObject<ns3::ndn::ContentStore> ()->Populate ();
