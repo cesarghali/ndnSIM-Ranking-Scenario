@@ -45,6 +45,8 @@ double contentReceivedCountSeconds;
 int inRouters[IN_ROUTERS_COUNT] = {4, 7, 9, 13, 14, 15, 16, 19, 21, 22, 23, 25, 27};
 int outRouters[OUT_ROUTERS_COUNT] = {0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 17, 18, 20, 24, 26, 28, 29};
 
+int goodConsumerCount;
+
 void
 BadContentReceived (std::string context, Ptr<ns3::ndn::ContentObject const> content)
 {
@@ -93,6 +95,8 @@ main (int argc, char *argv[])
   memset((char*)badContentReceivedCountHist, 0, sizeof(int) * (TOTAL_DURATION / HISTOGRAM_STEP));
   memset((char*)goodContentReceivedCountHist, 0, sizeof(int) * (TOTAL_DURATION / HISTOGRAM_STEP));
   memset((char*)contentReceivedCountHist, 0, sizeof(int) * (TOTAL_DURATION / HISTOGRAM_STEP));
+
+  goodConsumerCount = 0;
 
   // setting default parameters for PointToPoint links and channels
   Config::SetDefault ("ns3::PointToPointNetDevice::DataRate", StringValue ("1Mbps"));
@@ -268,15 +272,19 @@ main (int argc, char *argv[])
 	    }
 	  else
 	    {
+	      goodConsumerCount++;
 	      consumerHelper.SetAttribute ("Malicious", BooleanValue (false));
 	    }
 	  consumerHelper.Install (nodes.Get (i));
 
-	  std::ostringstream node_id;
-	  node_id << i;
-	  Config::Connect ("/NodeList/" + node_id.str() + "/ApplicationList/0/BadContentReceived", MakeCallback (BadContentReceived));
-	  Config::Connect ("/NodeList/" + node_id.str() + "/ApplicationList/0/GoodContentReceived", MakeCallback (GoodContentReceived));
-	  Config::Connect ("/NodeList/" + node_id.str() + "/ApplicationList/0/ReceivedContentObjects", MakeCallback (ReceivedContentObjects));
+	  if (BAD_CONSUMER_RATE == 0 || r > BAD_CONSUMER_RATE)
+	    {
+	      std::ostringstream node_id;
+	      node_id << i;
+	      Config::Connect ("/NodeList/" + node_id.str() + "/ApplicationList/0/BadContentReceived", MakeCallback (BadContentReceived));
+	      Config::Connect ("/NodeList/" + node_id.str() + "/ApplicationList/0/GoodContentReceived", MakeCallback (GoodContentReceived));
+	      Config::Connect ("/NodeList/" + node_id.str() + "/ApplicationList/0/ReceivedContentObjects", MakeCallback (ReceivedContentObjects));
+	    }
 	}
 
       // Run simulation
@@ -294,14 +302,14 @@ main (int argc, char *argv[])
       // Print Results
       std::cout << std::fixed << std::setprecision(2);
       std::cout << std::setw(8) << i * HISTOGRAM_STEP;
-      std::cout << std::setw(24) << (double)contentReceivedCountHist[i] / (ITERATIONS * NUM_OF_CONSUMERS);
+      std::cout << std::setw(24) << (double)contentReceivedCountHist[i] / (ITERATIONS * (goodConsumerCount / ITERATIONS));
 
       std::ostringstream bad_received_str;
-      bad_received_str << std::fixed << std::setprecision(2) << (double)badContentReceivedCountHist[i] / (ITERATIONS * NUM_OF_CONSUMERS) << " (" << ((double)badContentReceivedCountHist[i] / contentReceivedCountHist[i]) * 100 << "%)";
+      bad_received_str << std::fixed << std::setprecision(2) << (double)badContentReceivedCountHist[i] / (ITERATIONS * (goodConsumerCount / ITERATIONS)) << " (" << ((double)badContentReceivedCountHist[i] / contentReceivedCountHist[i]) * 100 << "%)";
       std::cout << std::setw(28) << bad_received_str.str();
       
       std::ostringstream good_received_str;
-      good_received_str << std::fixed << std::setprecision(2) << (double)goodContentReceivedCountHist[i] / (ITERATIONS * NUM_OF_CONSUMERS) << " (" << ((double)goodContentReceivedCountHist[i] / contentReceivedCountHist[i]) * 100 << "%)";
+      good_received_str << std::fixed << std::setprecision(2) << (double)goodContentReceivedCountHist[i] / (ITERATIONS * (goodConsumerCount / ITERATIONS)) << " (" << ((double)goodContentReceivedCountHist[i] / contentReceivedCountHist[i]) * 100 << "%)";
       std::cout << std::setw(29) << good_received_str.str();
       std::cout << std::endl;
     }
