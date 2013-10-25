@@ -9,7 +9,7 @@
 #define DISABLE_RANKING "false"
 
 #define TOTAL_DURATION 400
-#define ITERATIONS 1
+#define ITERATIONS 1000
 #define GOOD_CONTENT_TIMEOUT 100
 #define HISTOGRAM_STEP 20
 #define BAD_CONTENT_RATE 0.95
@@ -33,7 +33,7 @@ int goodConsumerCount;
 int64_t maxStoppingMicroSeconds;
 
 void
-StoppedOnGoodContent (std::string context, Ptr<ns3::ndn::ContentObject const> content, const ns3::Time stoppingTime)
+StoppedOnGoodContent (std::string context, Ptr<ns3::ndn::ContentObject const> content, ns3::Time stoppingTime)
 {
   if (stoppingTime.GetMicroSeconds() > maxStoppingMicroSeconds)
     maxStoppingMicroSeconds = stoppingTime.GetMicroSeconds();
@@ -205,7 +205,7 @@ main (int argc, char *argv[])
 	    {
 	      goodConsumerCount++;
 	      consumerHelper.SetAttribute ("Malicious", BooleanValue (false));
-	      consumerHelper.SetAttribute ("Stop", BooleanValue (true));
+	      consumerHelper.SetAttribute ("StopOnGoodContent", BooleanValue (true));
 	    }
 	  consumerHelper.Install (nodes.Get (i));
 

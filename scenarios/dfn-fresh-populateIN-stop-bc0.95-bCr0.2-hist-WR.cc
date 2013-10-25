@@ -33,7 +33,7 @@ int goodConsumerCount;
 int64_t maxStoppingMicroSeconds;
 
 void
-StoppedOnGoodContent (std::string context, Ptr<ns3::ndn::ContentObject const> content, const ns3::Time stoppingTime)
+StoppedOnGoodContent (std::string context, Ptr<ns3::ndn::ContentObject const> content, ns3::Time stoppingTime)
 {
   if (stoppingTime.GetMicroSeconds() > maxStoppingMicroSeconds)
     maxStoppingMicroSeconds = stoppingTime.GetMicroSeconds();
